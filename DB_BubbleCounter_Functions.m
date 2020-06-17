@@ -1,4 +1,5 @@
 %%%% To start the script, simply click "Run" 
+%%%% Image Processing Toolbox is required.
 %%%% Damien Batchelor
 %%%% University of Leeds
 %%%% June 2020
