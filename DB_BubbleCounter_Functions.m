@@ -98,23 +98,25 @@ FigFile = fullfile(myFolder, 'Histogram.fig');
 saveas(gcf,TifFile);
 saveas(gcf,FigFile);
 savelog(myFolder,diam_avg,conc_avg,conc_err,k,V_img,N);
-
+% This function runs all the image processing needed for GUI threshold values.
 function gui_threshold(theFiles,myFolder,scaling)
 baseFileName = theFiles(1).name; % Define just the file name
 fullFileName = fullfile(myFolder, baseFileName); %Create a full file address
-img = imread(fullFileName);
-gray = grayscale_process(img);
-global bw_thresh circle_sens
-binarythresh(gray);
+img = imread(fullFileName); %Read in Image
+gray = grayscale_process(img); %Run grayscale processing
+global bw_thresh circle_sens %Defined as global variables for nested functions.
+binarythresh(gray); %Determine binary sensitivity from GUI.
 uiwait;
-bw = bw_process(gray,bw_thresh);
-circle_thresh(bw,scaling);
+bw = bw_process(gray,bw_thresh); %Binarize image using determine threshold.
+circle_thresh(bw,scaling); %Determine circle detection sensitivity.
 uiwait;
 end
 function gray_img = grayscale_process(img)
-  gray       = rgb2gray(img); %convert to grayscale
-  filt       = medfilt2(gray,[2 2]); %Apply a grayscale contrast filter
-  gray_img   = imgaussfilt(filt); %Apply a 2nd contrast filter
+	if size(img,3) == 3
+  		gray       = rgb2gray(img); %convert to grayscale
+	end
+  	filt       = medfilt2(gray,[2 2]); %Apply a grayscale contrast filter
+  	gray_img   = imgaussfilt(filt); %Apply a 2nd contrast filter
 end
 function bw = bw_process(gray,thresh)
     bw          = imbinarize(gray,'adaptive','ForegroundPolarity','dark','Sensitivity',thresh); %Convert to binary
@@ -227,6 +229,7 @@ function circle_thresh(bw,scaling)
         close
      end
  end
+ % This function runs all of the analysis for detection bubbles in the image and filtering false detections.
  function [centers,radii_px] = analysis_thresh(bw,sens,scaling)
  id  = 'images:imfindcircles:warnForSmallRadius';
  warning('off', id);
@@ -275,9 +278,8 @@ function circle_thresh(bw,scaling)
  %Sort them by size (I think)
  data =  sortrows(data,3);
  
- %More Data Filtering - This section should remove any bubbles that
- %overlap with each other i.e, their centres are positioned within another
- %circle
+ %More Data Filtering - This section removes any bubbles that
+ % are positioned with their centre positions within one another.
  [distance,minDistance,minIndex] = deal(cell(1,size(data,1)));
  for p = 1:size(data,1)
      for pp = 1:size(data,1)
@@ -295,7 +297,8 @@ function circle_thresh(bw,scaling)
      if data(j,4) <   0.5*data(data(j,5),3)
          data(j,:) = [NaN];
      end
- end
+ end 
+ %Out put centres positions and radius.
  centers = [data(:,1) data(:,2)];
  radii_px = data(:,3)/2;
  end
@@ -312,6 +315,7 @@ function circle_thresh(bw,scaling)
  filePattern = fullfile(myFolder, '*.jpg'); % Change to whatever pattern you need.
  theFiles    = dir(filePattern);
  end
+ %This function prints a .csv containing some of the meta data. 
  function savelog(myFolder,diam_avg,conc_avg,conc_err,k,V_img,N);
 global circle_sens bw_thresh
 %Save a log file with meta data
@@ -326,6 +330,7 @@ fprintf(fileID,'%s %f' , ' Number of Images = ', k);
 fprintf(fileID,'%s %e' , ' Image Volume (mL) = ', V_img);
 fprintf(fileID,'%s %f' , ' Total Bubble Count = ', N);
 fclose(fileID);
+% Save the MATLAB workspace for recovery of more data.
 save('Workspace'); %Save workspace as a .mat file.
 end
  
