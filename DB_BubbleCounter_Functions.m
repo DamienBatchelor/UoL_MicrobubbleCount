@@ -1,3 +1,8 @@
+%%%% To start the script, simply click "Run" 
+%%%% Damien Batchelor
+%%%% University of Leeds
+%%%% June 2020
+
 clear all
 close all
 clc
