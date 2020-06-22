@@ -1,3 +1,7 @@
+%%%% Microbubble Image Analysis Tool
+%%%% Damien Batchelor
+%%%% University of Leeds
+%%%% June 2020
 clear all
 close all
 clc
